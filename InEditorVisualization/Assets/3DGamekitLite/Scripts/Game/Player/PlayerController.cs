@@ -646,6 +646,11 @@ namespace Gamekit3D
         // Called by OnReceiveMessage.
         void Damaged(Damageable.DamageMessage damageMessage)
         {
+
+            string damagerName = damageMessage.damager != null ? damageMessage.damager.name.Replace("(Clone)", "").Trim() : "Environment";
+            
+            AnalyticsManager.Instance.SendEvent("COMBAT", damagerName, "PLAYER_HIT", transform.position);
+
             // Set the Hurt parameter of the animator.
             m_Animator.SetTrigger(m_HashHurt);
 
@@ -677,6 +682,30 @@ namespace Gamekit3D
             m_VerticalSpeed = 0f;
             m_Respawning = true;
             m_Damageable.isInvulnerable = true;
+
+            string killerName = damageMessage.damager != null ? damageMessage.damager.name.Replace("(Clone)", "").Trim() : "Environment";
+            AnalyticsManager.Instance.SendEvent("COMBAT", killerName, "PLAYER_DIED", transform.position);
+
         }
+
+        public string GetPlayerStateString()
+        {
+            if (m_Respawning || m_Damageable.currentHitPoints <= 0) 
+                return "DEAD";
+
+            if (m_CurrentStateInfo.shortNameHash == m_HashHurt) 
+                return "HURT";
+
+            if (m_InAttack || m_InCombo) 
+                return "ATTACKING";
+
+            if (!m_IsGrounded) 
+                return "JUMPING";
+
+            if (IsMoveInput) 
+                return "WALKING";
+
+            return "IDLE";
+        } 
     }
 }

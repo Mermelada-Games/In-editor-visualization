@@ -233,6 +233,9 @@ namespace Gamekit3D
 
         public void Death(Damageable.DamageMessage msg)
         {
+            string myName = name;
+            AnalyticsManager.Instance.SendEvent("COMBAT", myName, "ENEMY_KILLED", transform.position);
+
             Vector3 pushForce = transform.position - msg.damageSource;
 
             pushForce.y = 0;
@@ -252,6 +255,10 @@ namespace Gamekit3D
         public void ApplyDamage(Damageable.DamageMessage msg)
         {
             //TODO : make that more generic, (e.g. move it to the MeleeWeapon code with a boolean to enable shaking of camera on hit?)
+
+            string myName = name;
+            AnalyticsManager.Instance.SendEvent("COMBAT", myName, "ENEMY_HIT", transform.position);
+
             if (msg.damager.name == "Staff")
                 CameraShake.Shake(0.06f, 0.1f);
 

@@ -1,6 +1,6 @@
 <?php
 $host = 'citmalumnes.upc.es';
-$dbname = 'sergiofc6o';
+$dbname = 'sergiofc6';
 $username = 'sergiofc6';
 $password = '4HMCaBXhhna3';
 
