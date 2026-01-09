@@ -151,4 +151,19 @@ public class AnalyticsManager : MonoBehaviour
             }
         }
     }
+    public void TrackItemPickup(string itemName)
+    {
+        Vector3 pos = (playerController != null) ? playerController.transform.position : transform.position;
+        SendEvent("ITEM", itemName, "PICKUP", pos);
+    }
+    public void TrackInteraction(string objectName)
+    {
+        Vector3 pos = (playerController != null) ? playerController.transform.position : transform.position;
+        SendEvent("ITEM", objectName, "INTERACT", pos);
+    }
+    public void TrackHealthPickup(string sourceName)
+    {
+        Vector3 pos = (playerController != null) ? playerController.transform.position : transform.position;
+        SendEvent("ITEM", sourceName, "HEAL", pos);
+    }
 }
