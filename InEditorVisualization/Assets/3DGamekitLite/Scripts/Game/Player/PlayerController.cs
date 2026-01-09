@@ -706,6 +706,15 @@ namespace Gamekit3D
                 return "WALKING";
 
             return "IDLE";
+        }
+
+        public string GetCurrentAreaName()
+        {
+            if (m_CurrentCheckpoint != null)
+            {
+                return m_CurrentCheckpoint.name;
+            }
+            return "Area1";
         } 
     }
 }

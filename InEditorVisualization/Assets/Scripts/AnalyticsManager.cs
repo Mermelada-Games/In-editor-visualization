@@ -90,6 +90,7 @@ public class AnalyticsManager : MonoBehaviour
 
         int currentHealth = 0;
         string currentState = "UNKNOWN";
+        string currentArea = "Unknown";
 
         if (playerController != null)
         {
@@ -99,10 +100,12 @@ public class AnalyticsManager : MonoBehaviour
                 currentHealth = damageable.currentHitPoints;
             }
             currentState = playerController.GetPlayerStateString();
+            currentArea = playerController.GetCurrentAreaName();
         }
 
         form.AddField("current_health", currentHealth);
         form.AddField("current_state", currentState);
+        form.AddField("area_name", currentArea);
 
         using (UnityWebRequest www = UnityWebRequest.Post(baseUrl + "track_position.php", form))
         {
