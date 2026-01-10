@@ -226,7 +226,93 @@ public class DataVisualizationEditorWindow : EditorWindow
 
         EditorGUILayout.EndVertical();
 
-        EditorGUILayout.HelpBox($"Total Events Loaded: {manager.recordedEvents.Count}", MessageType.Info);
+        EditorGUILayout.Space(10);
+
+        EditorGUILayout.BeginVertical("box");
+        EditorGUILayout.LabelField("Time Filter", EditorStyles.boldLabel);
+        
+        EditorGUI.BeginChangeCheck();
+        bool prevEnableTimeFilter = manager.enableTimeFilter;
+        manager.enableTimeFilter = EditorGUILayout.ToggleLeft("Enable Time Range Filter", manager.enableTimeFilter);
+        
+        if (prevEnableTimeFilter != manager.enableTimeFilter)
+        {
+            manager.ApplyTimeFilter();
+        }
+
+        if (manager.enableTimeFilter && manager.allLoadedEvents.Count > 0)
+        {
+            EditorGUILayout.Space(5);
+
+            TimeSpan minTime = TimeSpan.FromSeconds(manager.minTimestamp);
+            TimeSpan maxTime = TimeSpan.FromSeconds(manager.maxTimestamp);
+            TimeSpan currentMinTime = TimeSpan.FromSeconds(manager.currentMinTime);
+            TimeSpan currentMaxTime = TimeSpan.FromSeconds(manager.currentMaxTime);
+            
+            EditorGUILayout.LabelField($"Data Range: {minTime:hh\\:mm\\:ss} to {maxTime:hh\\:mm\\:ss}", EditorStyles.miniLabel);
+            
+            EditorGUILayout.Space(3);
+
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField("Selected Time Range:", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"From: {currentMinTime:hh\\:mm\\:ss}", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField($"To:   {currentMaxTime:hh\\:mm\\:ss}", EditorStyles.miniLabel);
+            
+            EditorGUILayout.Space(5);
+            
+            float newMinTime = manager.currentMinTime;
+            float newMaxTime = manager.currentMaxTime;
+            
+            EditorGUILayout.MinMaxSlider(
+                "Time Range", 
+                ref newMinTime, 
+                ref newMaxTime, 
+                manager.minTimestamp, 
+                manager.maxTimestamp
+            );
+
+            EditorGUILayout.Space(3);
+            newMinTime = EditorGUILayout.Slider("Start Time", newMinTime, manager.minTimestamp, manager.maxTimestamp);
+            newMaxTime = EditorGUILayout.Slider("End Time", newMaxTime, manager.minTimestamp, manager.maxTimestamp);
+            
+            if (newMinTime != manager.currentMinTime || newMaxTime != manager.currentMaxTime)
+            {
+                manager.currentMinTime = newMinTime;
+                manager.currentMaxTime = newMaxTime;
+                manager.ApplyTimeFilter();
+            }
+            
+            EditorGUILayout.Space(5);
+            
+            if (GUILayout.Button("Reset to Full Range"))
+            {
+                manager.currentMinTime = manager.minTimestamp;
+                manager.currentMaxTime = manager.maxTimestamp;
+                manager.ApplyTimeFilter();
+            }
+            
+            EditorGUILayout.EndVertical();
+            
+            float duration = manager.currentMaxTime - manager.currentMinTime;
+            TimeSpan span = TimeSpan.FromSeconds(duration);
+            EditorGUILayout.HelpBox($"Selected Duration: {(int)span.TotalHours:D2}:{span.Minutes:D2}:{span.Seconds:D2}", MessageType.Info);
+        }
+        else if (manager.enableTimeFilter)
+        {
+            EditorGUILayout.HelpBox("Load data first to enable time filtering", MessageType.Warning);
+        }
+        
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.Space(5);
+        
+        int totalEvents = manager.allLoadedEvents.Count;
+        int filteredEvents = manager.recordedEvents.Count;
+        string eventInfo = manager.enableTimeFilter && totalEvents > 0 
+            ? $"Showing {filteredEvents} of {totalEvents} events ({(float)filteredEvents/totalEvents*100:F1}%)"
+            : $"Total Events Loaded: {totalEvents}";
+            
+        EditorGUILayout.HelpBox(eventInfo, MessageType.Info);
     }
 }
 #endif

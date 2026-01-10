@@ -17,6 +17,7 @@ public class DataVisualizationDebugger : MonoBehaviour
 
     [HideInInspector] public List<SessionInfo> availableSessions = new List<SessionInfo>();
     [HideInInspector] public List<WorldEvent> recordedEvents = new List<WorldEvent>();
+    [HideInInspector] public List<WorldEvent> allLoadedEvents = new List<WorldEvent>();
 
     [HideInInspector] public bool showMarkers = true;
     [HideInInspector] [Range(0.1f, 5f)] public float globalSize = 1.0f;
@@ -37,6 +38,12 @@ public class DataVisualizationDebugger : MonoBehaviour
     [HideInInspector] public int hmIntensity = 15; 
     [HideInInspector] public int hmFullRange = 1; 
     [HideInInspector] public int hmTotalRange = 3; 
+
+    [HideInInspector] public bool enableTimeFilter = false;
+    [HideInInspector] public float minTimestamp = 0f;
+    [HideInInspector] public float maxTimestamp = 100f;
+    [HideInInspector] public float currentMinTime = 0f;
+    [HideInInspector] public float currentMaxTime = 100f;
 
     private Grid runtimeGrid;
     private bool needsRebuildHeatmap = false;
@@ -196,7 +203,9 @@ public class DataVisualizationDebugger : MonoBehaviour
 
     private void ProcessLoadedData(SessionFullData data)
     {
-        recordedEvents.Clear();
+        allLoadedEvents.Clear();
+        float minTime = 0;
+        float eventIndex = 0;
         
         if (data.positions != null)
         {
@@ -207,8 +216,10 @@ public class DataVisualizationDebugger : MonoBehaviour
                 evt.position = new Vector3(pos.pos_x, pos.pos_y, pos.pos_z);
                 evt.category = EventCategory.PlayerPosition;
                 evt.message = $"State: {pos.current_state}\nArea: {pos.area_name}";
-                evt.timestamp = 0; 
-                recordedEvents.Add(evt);
+                evt.timestamp = eventIndex;
+                
+                allLoadedEvents.Add(evt);
+                eventIndex++;
             }
         }
 
@@ -219,6 +230,7 @@ public class DataVisualizationDebugger : MonoBehaviour
                 WorldEvent evt = new WorldEvent();
                 evt.id = Guid.NewGuid().ToString();
                 evt.position = new Vector3(e.pos_x, e.pos_y, e.pos_z);
+                evt.timestamp = eventIndex;
                 
                 evt.category = EventCategory.None;
                 
@@ -235,16 +247,47 @@ public class DataVisualizationDebugger : MonoBehaviour
                 if (evt.category != EventCategory.None)
                 {
                     evt.message = $"{e.cat} - {e.type}";
-                    recordedEvents.Add(evt);
+                    allLoadedEvents.Add(evt);
+                    eventIndex++;
                 }
             }
         }
 
+        if (allLoadedEvents.Count > 0)
+        {
+            minTimestamp = minTime;
+            maxTimestamp = eventIndex - 1;
+            currentMinTime = minTime;
+            currentMaxTime = maxTimestamp;
+        }
+        
+        ApplyTimeFilter();
         MarkHeatmapDirty();
         
 #if UNITY_EDITOR
         SceneView.RepaintAll();
 #endif
+    }
+
+    public void ApplyTimeFilter()
+    {
+        if (!enableTimeFilter || allLoadedEvents.Count == 0)
+        {
+            recordedEvents = new List<WorldEvent>(allLoadedEvents);
+        }
+        else
+        {
+            recordedEvents = new List<WorldEvent>();
+            foreach (var evt in allLoadedEvents)
+            {
+                if (evt.timestamp >= currentMinTime && evt.timestamp <= currentMaxTime)
+                {
+                    recordedEvents.Add(evt);
+                }
+            }
+        }
+        
+        MarkHeatmapDirty();
     }
 
     public void RebuildHeatmap()
