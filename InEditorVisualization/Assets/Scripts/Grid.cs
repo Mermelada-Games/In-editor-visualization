@@ -1,17 +1,9 @@
 using UnityEngine;
-using System;
 
 public class Grid
 {
     public const int HEAT_MAP_MAX_VALUE = 100;
     public const int HEAT_MAP_MIN_VALUE = 0;
-
-    public event EventHandler<OnGridValueChangedEventArgs> OnGridValueChanged;
-    public class OnGridValueChangedEventArgs : EventArgs
-    {
-        public int x;
-        public int z;
-    }
 
     private readonly int width;
     private readonly int depth;
@@ -19,13 +11,12 @@ public class Grid
     private Vector3 originPosition;
     private readonly int[,] gridArray;
 
-    public Grid(int width, int depth, float cellSize, Vector3 originPosition)
+    public Grid(int width, int depth, float cellSize, Vector3 centerPos)
     {
         this.width = width;
         this.depth = depth;
         this.cellSize = cellSize;
-        this.originPosition = originPosition;
-
+        this.originPosition = centerPos - new Vector3(width * cellSize * 0.5f, 0, depth * cellSize * 0.5f);
         gridArray = new int[width, depth];
     }
 
@@ -49,14 +40,7 @@ public class Grid
         if (x >= 0 && z >= 0 && x < width && z < depth)
         {
             gridArray[x, z] = Mathf.Clamp(value, HEAT_MAP_MIN_VALUE, HEAT_MAP_MAX_VALUE);
-            OnGridValueChanged?.Invoke(this, new OnGridValueChangedEventArgs { x = x, z = z });
         }
-    }
-
-    public void SetValue(Vector3 worldPosition, int value)
-    {
-        GetXZ(worldPosition, out int x, out int z);
-        SetValue(x, z, value);
     }
 
     public void AddValue(int x, int z, int value)
