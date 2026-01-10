@@ -70,6 +70,11 @@ public class DataVisualizationEditorWindow : EditorWindow
         manager.showLabels = EditorGUILayout.Toggle("Show Labels", manager.showLabels);
         manager.labelColor = EditorGUILayout.ColorField(GUIContent.none, manager.labelColor, GUILayout.Width(50));
         EditorGUILayout.EndHorizontal();
+        
+        if (manager.showLabels)
+        {
+            manager.labelFontSize = EditorGUILayout.IntSlider("Label Font Size", manager.labelFontSize, 8, 32);
+        }
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.Space();

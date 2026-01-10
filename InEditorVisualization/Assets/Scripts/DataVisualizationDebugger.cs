@@ -23,6 +23,7 @@ public class DataVisualizationDebugger : MonoBehaviour
     [HideInInspector] [Range(0.1f, 5f)] public float globalSize = 1.0f;
     [HideInInspector] public bool showLabels = true;
     [HideInInspector] public Color labelColor = Color.white;
+    [HideInInspector] [Range(8, 32)] public int labelFontSize = 12;
     [HideInInspector] public List<CategorySettings> categorySettings = new List<CategorySettings>();
 
     [HideInInspector] public bool showHeatmap = false;
@@ -391,7 +392,7 @@ public class DataVisualizationDebugger : MonoBehaviour
                     GUIStyle style = new GUIStyle();
                     style.normal.textColor = labelColor;
                     style.alignment = TextAnchor.MiddleCenter;
-                    style.fontSize = 12;
+                    style.fontSize = labelFontSize;
                     string labelText = $"{evt.category}\n{evt.message}";
                     Handles.Label(evt.position + Vector3.up * finalSize, labelText, style);
                 }
