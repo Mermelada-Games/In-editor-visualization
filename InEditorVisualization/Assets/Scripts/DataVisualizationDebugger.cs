@@ -30,6 +30,8 @@ public class DataVisualizationDebugger : MonoBehaviour
     [HideInInspector] public int hmWidth = 50;
     [HideInInspector] public int hmDepth = 50;
     [HideInInspector] public float hmCellSize = 2f;
+    [HideInInspector] public float hmHeight = 1.0f; 
+
     [HideInInspector] public Gradient hmGradient;
     [HideInInspector] [Range(0, 1)] public float hmTransparency = 0.5f;
     
@@ -339,7 +341,7 @@ public class DataVisualizationDebugger : MonoBehaviour
                         Gizmos.color = c;
 
                         Vector3 cellCenter = runtimeGrid.GetWorldPosition(x, z) + new Vector3(hmCellSize, 0, hmCellSize) * 0.5f;
-                        Gizmos.DrawCube(cellCenter, new Vector3(hmCellSize, 0.1f, hmCellSize));
+                        Gizmos.DrawCube(cellCenter, new Vector3(hmCellSize, hmHeight, hmCellSize));
                     }
                 }
                 

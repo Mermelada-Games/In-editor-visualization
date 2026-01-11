@@ -214,6 +214,7 @@ public class DataVisualizationEditorWindow : EditorWindow
         manager.hmWidth = EditorGUILayout.IntSlider("Width (Cells)", manager.hmWidth, 10, 200);
         manager.hmDepth = EditorGUILayout.IntSlider("Depth (Cells)", manager.hmDepth, 10, 200);
         manager.hmCellSize = EditorGUILayout.Slider("Cell Size", manager.hmCellSize, 0.5f, 10f);
+        manager.hmHeight = EditorGUILayout.Slider("Cell Height", manager.hmHeight, 0.1f, 20f);
         
         EditorGUILayout.Space();
 
