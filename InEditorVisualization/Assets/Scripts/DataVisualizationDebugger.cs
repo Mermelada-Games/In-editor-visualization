@@ -247,7 +247,9 @@ public class DataVisualizationDebugger : MonoBehaviour
 
                 if (evt.category != EventCategory.None)
                 {
-                    evt.message = $"{e.cat} - {e.type}";
+                    string extraInfo = string.IsNullOrEmpty(e.aux_data) ? "" : $" ({e.aux_data})";
+                    evt.message = $"{e.type}{extraInfo}";
+                    
                     allLoadedEvents.Add(evt);
                     eventIndex++;
                 }

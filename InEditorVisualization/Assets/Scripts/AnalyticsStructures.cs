@@ -30,6 +30,7 @@ public class EventData
     public string cat;
     public string type; 
     public float pos_x, pos_y, pos_z;
+    public string aux_data;
 }
 
 [Serializable]
