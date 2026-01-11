@@ -8,8 +8,12 @@ public class DataVisualizationEditorWindow : EditorWindow
 {
     private DataVisualizationDebugger manager;
     private Vector2 scrollPos;
+    private Vector2 eventsListScrollPos;
     private int selectedTab = 0;
-    private string[] tabs = new string[] { "Markers", "Heatmap", "Tools" };
+
+    private string[] tabs = new string[] { "Markers", "Heatmap", "Events", "Tools" };
+
+    private EventCategory eventsTabFilter = (EventCategory)~0; 
 
     [MenuItem("Tools/Data Visualization")]
     public static void ShowWindow()
@@ -50,13 +54,79 @@ public class DataVisualizationEditorWindow : EditorWindow
 
         if (selectedTab == 0) DrawMarkersTab();
         else if (selectedTab == 1) DrawHeatmapTab();
-        else if (selectedTab == 2) DrawToolsTab();
+        else if (selectedTab == 2) DrawEventsListTab();
+        else if (selectedTab == 3) DrawToolsTab();
 
         if (GUI.changed)
         {
             EditorUtility.SetDirty(manager);
             SceneView.RepaintAll();
         }
+    }
+
+    private void DrawEventsListTab()
+    {
+        EditorGUILayout.LabelField("Event Log", EditorStyles.boldLabel);
+
+        if (manager.recordedEvents == null || manager.recordedEvents.Count == 0)
+        {
+            EditorGUILayout.HelpBox("No events to display. Load data in the 'Tools' tab first.", MessageType.Info);
+            return;
+        }
+
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Filter by Type:", GUILayout.Width(100));
+
+        eventsTabFilter = (EventCategory)EditorGUILayout.EnumFlagsField(eventsTabFilter);
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.Space(5);
+
+        EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+        EditorGUILayout.LabelField("Time", EditorStyles.boldLabel, GUILayout.Width(60));
+        EditorGUILayout.LabelField("Category", EditorStyles.boldLabel, GUILayout.Width(120));
+        EditorGUILayout.LabelField("Info", EditorStyles.boldLabel, GUILayout.ExpandWidth(true));
+        EditorGUILayout.LabelField("Position", EditorStyles.boldLabel, GUILayout.Width(160));
+        EditorGUILayout.EndHorizontal();
+
+        eventsListScrollPos = EditorGUILayout.BeginScrollView(eventsListScrollPos);
+        
+        int displayedCount = 0;
+
+        for (int i = 0; i < manager.recordedEvents.Count; i++)
+        {
+            var evt = manager.recordedEvents[i];
+
+            if ((evt.category & eventsTabFilter) == 0) continue;
+
+            displayedCount++;
+
+            EditorGUILayout.BeginHorizontal("box");
+
+            EditorGUILayout.LabelField(evt.timestamp.ToString("F2"), GUILayout.Width(60));
+
+            Color originalColor = GUI.contentColor;
+            if (manager.categorySettings != null)
+            {
+                var setting = manager.categorySettings.Find(x => x.category == evt.category);
+                if (setting != null) GUI.contentColor = setting.color;
+            }
+            
+            EditorGUILayout.LabelField(evt.category.ToString(), GUILayout.Width(120));
+            
+            GUI.contentColor = originalColor;
+
+            GUILayout.Label(evt.message ?? "", EditorStyles.wordWrappedLabel, GUILayout.ExpandWidth(true));
+
+            string posStr = $"({evt.position.x:F1}, {evt.position.y:F1}, {evt.position.z:F1})";
+            EditorGUILayout.LabelField(posStr, EditorStyles.miniLabel, GUILayout.Width(160));
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        EditorGUILayout.EndScrollView();
+
+        EditorGUILayout.Space(5);
+        EditorGUILayout.HelpBox($"Displaying {displayedCount} of {manager.recordedEvents.Count} events based on current filters.", MessageType.None);
     }
 
     private void DrawMarkersTab()
@@ -89,7 +159,7 @@ public class DataVisualizationEditorWindow : EditorWindow
         EditorGUILayout.LabelField("Color", GUILayout.Width(50));
         EditorGUILayout.LabelField("Path", GUILayout.Width(35));
         EditorGUILayout.LabelField("Icon", GUILayout.Width(70));
-        EditorGUILayout.LabelField("Override Size", GUILayout.Width(60));
+        EditorGUILayout.LabelField("Override Size", GUILayout.Width(120));
         EditorGUILayout.EndHorizontal();
 
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
