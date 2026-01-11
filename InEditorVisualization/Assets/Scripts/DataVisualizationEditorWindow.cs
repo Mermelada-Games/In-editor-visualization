@@ -27,6 +27,10 @@ public class DataVisualizationEditorWindow : EditorWindow
         if (manager == null)
         {
             manager = FindFirstObjectByType<DataVisualizationDebugger>();
+        }
+
+        if (manager == null)
+        {
             EditorGUILayout.HelpBox("No 'DataVisualizationDebugger' found in scene.", MessageType.Warning);
             if (GUILayout.Button("Create"))
             {
