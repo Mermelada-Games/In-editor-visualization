@@ -166,4 +166,23 @@ public class AnalyticsManager : MonoBehaviour
         Vector3 pos = (playerController != null) ? playerController.transform.position : transform.position;
         SendEvent("ITEM", sourceName, "HEAL", pos);
     }
+
+    private void OnApplicationQuit()
+    {
+        if (currentSessionId != -1)
+        {
+            StartCoroutine(EndSession());
+        }
+    }
+
+    IEnumerator EndSession()
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("session_id", currentSessionId);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(baseUrl + "end_session.php", form))
+        {
+            yield return www.SendWebRequest();
+        }
+    }
 }
